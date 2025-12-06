@@ -1,3 +1,219 @@
+# AI Voiceover Tool
+
+## 📖 Project Introduction
+
+The AI ​​Voiceover Tool is a professional AI voice cloning and dubbing solution that converts SRT subtitle files or TXT text into high-quality voiceover audio using advanced TTS models. The tool supports multiple time synchronization strategies, accurately matching subtitle durations to generate voiceovers perfectly synchronized with the video.
+
+### Main Features
+
+- **🎯 Precise Synchronization**: Supports time stretching strategies to ensure the voiceover perfectly matches the subtitle duration.
+- **🎨 High-Quality Audio**: Based on models such as Fish-speech, IndexTTS, IndexTTS2, CosyVoice, and F5, generating natural and fluent speech.
+- **⚙️ Flexible Strategies**: Provides basic and stretching strategies to adapt to different needs.
+- **🎭 Emotion Control**: The IndexTTS2 engine supports emotional expression control, allowing adjustment of voice emotion through audio, vectors, and text.
+- **✨ Graphical Interface**: Provides an intuitive and easy-to-use Web UI, supporting drag-and-drop file uploads, online parameter configuration, and real-time progress display, greatly simplifying the operation process. - **📊 Real-time Monitoring**: Professional logging system, displaying processing progress and status in real time
+
+### 🎬 Demo Video
+<video src="resources/open-dubbing.mp4" controls width="100%"></video>
+
+## 🏗️ Project Architecture
+
+```
+open-dubbing/
+├── run.sh                     # One-click deployment and startup script (Fish Speech)
+├── install.sh                 # Fish Speech environment installation script
+├── install-index-tts.sh       # IndexTTS environment installation script
+├── install-index-tts2.sh      # IndexTTS2 environment installation script
+├── install-f5-tts.sh          # F5-TTS environment installation script
+├── install-cosyvoice.sh       # CosyVoice environment installation script
+├── server.py                  # Web UI service startup script
+├── requirements.txt           # Python dependencies
+├── ai_dubbing/
+│   ├── run_dubbing.py            # [Entry Point] Dubbing task based on configuration file
+│   ├── run_optimize_subtitles.py # [Entry Point] Subtitle optimization task based on configuration file (addresses the issue of unreasonable duration of translated Chinese subtitles)
+│   ├── dubbing.conf.example   # Configuration file template
+│   ├── web/
+│   │   ├── static/              # Stores static files such as CSS and JavaScript
+│   │   └── templates/           # Stores HTML template files
+│   ├── src/
+│   │   ├── __init__.py            # Module initialization
+│   │   ├── config.py              # Configuration management
+│   │   ├── utils/                 # Utility package
+│   │   │   ├── __init__.py
+│   │   │   └── common_utils.py
+│   │   ├── logger.py              # Logging system
+│   │   ├── audio_processor.py     # Audio processor
+│   │   ├── parsers/               # Unified parser module
+│   │   │   ├── __init__.py        # Parser export
+│   │   │   ├── srt_parser.py      # SRT parser
+│   │   │   └── txt_parser.py      # TXT parser
+│   │   └── strategies/            # Synchronization strategies
+│   │       ├── __init__.py        # Strategy registration
+│   │       ├── base_strategy.py   # Abstract base class
+│   │       ├── basic_strategy.py  # Basic strategy
+``` ```
+│       └── stretch_strategy.py # Time stretching strategy
+│   │   └── tts_engines/           # TTS engines
+│   │       ├── __init__.py        # Engine registration
+│   │       ├── base_engine.py     # Abstract base class
+│   │       ├── index_tts_engine.py # IndexTTS engine
+│   │       ├── index_tts2_engine.py # IndexTTS2 engine
+│   │       ├── f5_tts_engine.py   # F5-TTS engine
+│   │       ├── cosy_voice_engine.py # CosyVoice engine
+│   │       └── fish_speech_engine.py # Fish Speech engine
+└── README.md                  # Documentation
+```
+
+## 🚀 Quick Start
+
+### One-click Deployment and Startup (Recommended)
+
+The project provides a `run.sh` one-click deployment script that automatically completes environment configuration, dependency installation, model download, and service startup:
+
+```bash
+./run.sh
+```
+
+**Script functions:**
+- 🔧 Automatically creates and activates the `fish-speech` Conda environment
+- 📦 Installs all necessary dependencies (including FFmpeg, PyTorch, etc.)
+- 🔗 Clones and installs the Fish Speech engine
+- 📥 Downloads the pre-trained model (openaudio-s1-mini)
+- ⚙️ Automatically generates configuration files
+- 🌐 Starts the Web UI server
+
+After execution, the service will run at `http://127.0.0.1:8000`, and you can start using it directly in your browser. ### Manual Environment Configuration
+
+The project provides separate installation scripts for each TTS engine. You can choose to install them as needed:
+
+#### Fish Speech Engine (Recommended)
+```bash
+./install.sh
+# Or use the specific script name
+./install-fish-speech.sh
+```
+
+#### IndexTTS Engine
+```bash
+./install-index-tts.sh
+```
+
+#### IndexTTS2 Engine
+```bash
+./install-index-tts2.sh
+```
+
+#### F5-TTS Engine
+```bash
+./install-f5-tts.sh
+```
+
+#### CosyVoice Engine
+```bash
+./install-cosyvoice.sh
+```
+
+**Start the service after installation:**
+
+Each TTS engine uses a separate conda environment. Activate the corresponding environment and then start the service:
+
+```bash
+# Fish Speech Engine
+conda activate fish-speech
+python server.py
+
+# IndexTTS Engine
+conda activate index-tts
+python server.py
+
+# IndexTTS2 Engine
+conda activate index-tts2
+python server.py
+
+# F5-TTS Engine
+conda activate f5-tts
+python server.py
+
+# CosyVoice Engine
+conda activate cosyvoice
+python server.py
+```
+
+> **Note**: Remember to set the TTS engine to the corresponding engine type (`fish_speech`, `index_tts`, `index_tts2`, `f5_tts`, `cosy_voice`) in the Web UI.
+
+## 📝 Usage Instructions
+
+### 💻 Web UI Interface
+
+To provide a more intuitive and convenient user experience, the project includes a web interface based on FastAPI.
+
+#### Starting the Web Service
+
+Run the following command in the project root directory:
+
+```bash
+python server.py
+```
+
+After the service starts, open `http://127.0.0.1:8000` in your browser to access it.
+
+#### Interface Function Overview
+
+![AI Dubbing Web UI](resources/webui.jpeg)
+
+The Web UI is mainly divided into the following functional areas:
+
+1.  **File Upload Area**:
+*   **SRT/TXT File**: Upload your main subtitle file. *   **Reference Audio**: Click the "Add Reference Audio" button to add one or more reference audio-text pairs. Each reference audio requires corresponding text for voice cloning.
+
+2.  **Configuration Options**:
+*   **TTS Engine**: Select the core model used for speech synthesis (e.g., `fish_speech`). 
+*   **Strategy**: Select the time synchronization strategy for audio and subtitles (e.g., the `stretch` strategy strictly matches the duration). 
+*   **Language**: Select the language corresponding to the subtitles.
+
+3.  **Advanced Configuration**:
+*   Provides fine-grained adjustments for advanced parameters suchs as **concurrency**, **subtitle optimization**, and **time borrowing**. 
+*   **IndexTTS2 Emotion Control**: When the `index_tts2` engine is selected, a dedicated emotion control panel will be displayed, supporting:
+*   **Emotion Mode**: Four modes: automatic analysis, audio prompting, emotion vector, and text description.
+*   **Emotion Intensity**: Adjustable intensity of emotional expression (0.0-1.0).
+*   **Random Sampling**: Increases natural variation in speech.
+*   After modifying all configurations, click **"Save Configuration"** to write them to the `dubbing.conf` file for reuse via the command line or other methods.
+
+4.  **Start Processing**:
+*   Once all parameters are set, click the **"Start Dubbing"** button to start the task. 
+*   During processing, the page will display the task progress in real time. Upon completion, a download link for the final audio file will be provided. ### Running via Python Script (Alternative)
+
+#### 1. Create Configuration File
+Copy the configuration file template and modify it:
+
+```bash
+cp ai_dubbing/dubbing.conf.example ai_dubbing/dubbing.conf
+```
+
+#### 2. Edit Configuration File
+Modify the parameters in `ai_dubbing/dubbing.conf`:
+
+```ini
+# SRT Dubbing Tool Configuration File
+# Copy this file and modify the parameters according to your needs
+
+[Basic Configuration]
+# Input file path (SRT or TXT, must be specified)
+input_file = subtitles/movie.srt
+
+# Reference voice file paths (supports wav/mp3, multiple files separated by commas)
+voice_files = voices/ref1.wav, voices/ref2.mp3
+
+# Corresponding text for reference audio (one-to-one correspondence with voice_files, text enclosed in double quotes)
+prompt_texts = "This is the text for the first reference audio", "This is the text for the second reference audio"
+
+# Output audio file path (default: output.wav)
+output_file = output/movie_dubbed.wav
+
+# TTS engine selection: fish_speech, index_tts, index_tts2, f5_tts,
+```
+
+
+
 # AI配音工具
 
 ## 📖 项目介绍
